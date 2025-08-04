@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GoGemba</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    * {
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .gradient-bg {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    }
+    
+    .card-gradient {
+      background: linear-gradient(145deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .glass-input {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white;
+      transition: all 0.3s ease;
+    }
+    
+    .glass-input:focus {
+      background: rgba(255,255,255,0.15);
+      border-color: rgba(59,130,246,0.5);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+    }
+    
+    .glass-input::placeholder {
+      color: rgba(255,255,255,0.6);
+    }
+    
+    .glass-input option {
+      background: #1f2937;
+      color: white;
+    }
+    
+    .hover-lift {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .hover-lift:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(59,130,246,0.3);
+    }
+    
+    .btn-success {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      transition: all 0.3s ease;
+    }
+    
+    .btn-success:hover {
+      background: linear-gradient(135deg, #059669 0%, #047857 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(16,185,129,0.3);
+    }
+    
+    .title-gradient {
+      background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #34d399 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .status-badge {
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+    }
+    
+    .status-active {
+      background: rgba(34,197,94,0.2);
+      color: #4ade80;
+      border: 1px solid rgba(34,197,94,0.3);
+    }
+    
+    .status-pending {
+      background: rgba(251,191,36,0.2);
+      color: #fbbf24;
+      border: 1px solid rgba(251,191,36,0.3);
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.6s ease-out forwards;
+      opacity: 0;
+    }
+    
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .stagger-1 { animation-delay: 0.1s; }
+    .stagger-2 { animation-delay: 0.2s; }
+    .stagger-3 { animation-delay: 0.3s; }
+    
+    .walk-item {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .walk-item::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 4px;
+      background: linear-gradient(135deg, #3b82f6, #10b981);
+      border-radius: 0 2px 2px 0;
+    }
+    
+    .form-slide {
+      transform: translateY(-20px);
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .form-slide.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    
+    .floating-particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+    }
+    
+    .particle {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      animation: float 20s infinite linear;
+    }
+    
+    @keyframes float {
+      0% {
+        transform: translateY(100vh) rotate(0deg);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body class="gradient-bg text-white min-h-screen">
+  <div class="floating-particles" id="particles"></div>
+  
+  <div class="container mx-auto px-6 py-8 max-w-4xl">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 fade-in">
+      <div>
+        <h1 class="text-3xl md:text-4xl font-bold title-gradient mb-2">GoGemba</h1>
+        <p class="text-gray-300 text-lg">Walk Management System</p>
+      </div>
+      <a href="index.html" class="btn-primary text-white px-6 py-3 rounded-xl font-medium inline-flex items-center mt-4 md:mt-0">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+        Back to Launcher
+      </a>
+    </div>
+
+    <!-- Walk List -->
+    <div class="mb-8 fade-in stagger-1">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-semibold text-white">Your Gemba Walks</h2>
+        <div class="text-sm text-gray-400">
+          <span class="status-badge status-active mr-2">
+            <div class="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
+            Active
+          </span>
+          <span class="status-badge status-pending">
+            <div class="w-2 h-2 bg-yellow-400 rounded-full mr-2"></div>
+            Pending
+          </span>
+        </div>
+      </div>
+      
+      <div class="space-y-4">
+        <div class="card-gradient p-6 rounded-2xl hover-lift walk-item">
+          <div class="flex justify-between items-start">
+            <div class="flex-1">
+              <h3 class="text-xl font-semibold text-white mb-2">Line 3 - Morning Shift</h3>
+              <div class="flex items-center space-x-4 text-sm text-gray-300">
+                <span class="flex items-center">
+                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  Started: 08:30 AM
+                </span>
+                <span class="flex items-center">
+                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  Safety Audit
+                </span>
+              </div>
+            </div>
+            <span class="status-badge status-active">In Progress</span>
+          </div>
+          <div class="mt-4 flex space-x-3">
+            <button class="btn-primary px-4 py-2 rounded-lg text-sm font-medium">Continue</button>
+            <button class="glass-input px-4 py-2 rounded-lg text-sm font-medium border">View Details</button>
+          </div>
+        </div>
+
+        <div class="card-gradient p-6 rounded-2xl hover-lift walk-item">
+          <div class="flex justify-between items-start">
+            <div class="flex-1">
+              <h3 class="text-xl font-semibold text-white mb-2">Warehouse Area</h3>
+              <div class="flex items-center space-x-4 text-sm text-gray-300">
+                <span class="flex items-center">
+                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a1 1 0 011-1h6a1 1 0 011 1v4m-8 0h8m-8 0V6a1 1 0 00-1 1v10a1 1 0 001 1h8a1 1 0 001-1V7a1 1 0 00-1-1"></path>
+                  </svg>
+                  Completed: Yesterday
+                </span>
+                <span class="flex items-center">
+                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                  </svg>
+                  5S Check
+                </span>
+              </div>
+            </div>
+            <span class="status-badge" style="background: rgba(107,114,128,0.2); color: #9ca3af; border: 1px solid rgba(107,114,128,0.3);">Completed</span>
+          </div>
+          <div class="mt-4 flex space-x-3">
+            <button class="glass-input px-4 py-2 rounded-lg text-sm font-medium border">View Report</button>
+            <button class="glass-input px-4 py-2 rounded-lg text-sm font-medium border">Export</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- New Walk Button -->
+    <div class="mb-6 fade-in stagger-2">
+      <button onclick="toggleForm()" class="btn-success text-white px-8 py-4 rounded-xl font-medium text-lg inline-flex items-center">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+        </svg>
+        Start New Walk
+      </button>
+    </div>
+
+    <!-- New Walk Form -->
+    <div id="walkForm" class="card-gradient p-8 rounded-2xl hidden form-slide fade-in stagger-3">
+      <div class="flex items-center mb-6">
+        <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-green-500 rounded-xl flex items-center justify-center mr-4">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+          </svg>
+        </div>
+        <div>
+          <h2 class="text-2xl font-semibold text-white">New Gemba Walk</h2>
+          <p class="text-gray-400">Configure your walk parameters</p>
+        </div>
+      </div>
+
+      <div class="space-y-6">
+        <div>
+          <label class="block text-white font-medium mb-3">Walk Title/Area:</label>
+          <input type="text" class="glass-input w-full p-4 rounded-xl text-white" placeholder="Assembly Line 2">
+        </div>
+
+        <div>
+          <label for="checklistTemplate" class="block text-white font-medium mb-3">Checklist Template:</label>
+          <select id="checklistTemplate" class="glass-input w-full p-4 rounded-xl text-white">
+            <option value="">Select a template...</option>
+            <option>Safety Audit</option>
+            <option>5S Check</option>
+            <option>Standard Work Review</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-white font-medium mb-3">Expected Duration:</label>
+            <select class="glass-input w-full p-4 rounded-xl text-white">
+              <option>30 minutes</option>
+              <option>1 hour</option>
+              <option>2 hours</option>
+              <option>Custom</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-white font-medium mb-3">Priority Level:</label>
+            <select class="glass-input w-full p-4 rounded-xl text-white">
+              <option>Standard</option>
+              <option>High</option>
+              <option>Critical</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex space-x-4 pt-4">
+          <button class="btn-primary text-white px-8 py-3 rounded-xl font-medium flex-1 md:flex-none">
+            Begin Walk
+          </button>
+          <button onclick="toggleForm()" class="glass-input px-8 py-3 rounded-xl font-medium border">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="mt-12 fade-in stagger-3">
+      <h3 class="text-xl font-semibold text-white mb-6">Walk Statistics</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="card-gradient p-6 rounded-2xl text-center">
+          <div class="text-3xl font-bold text-green-400 mb-2">24</div>
+          <div class="text-gray-300">Walks Completed</div>
+        </div>
+        <div class="card-gradient p-6 rounded-2xl text-center">
+          <div class="text-3xl font-bold text-blue-400 mb-2">2</div>
+          <div class="text-gray-300">In Progress</div>
+        </div>
+        <div class="card-gradient p-6 rounded-2xl text-center">
+          <div class="text-3xl font-bold text-purple-400 mb-2">156</div>
+          <div class="text-gray-300">Issues Identified</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toggleForm() {
+      const form = document.getElementById('walkForm');
+      if (form.classList.contains('hidden')) {
+        form.classList.remove('hidden');
+        setTimeout(() => form.classList.add('show'), 10);
+      } else {
+        form.classList.remove('show');
+        setTimeout(() => form.classList.add('hidden'), 400);
+      }
+    }
+
+    // Create floating particles
+    function createParticles() {
+      const particlesContainer = document.getElementById('particles');
+      const particleCount = 15;
+      
+      for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 20 + 's';
+        particle.style.animationDuration = (20 + Math.random() * 15) + 's';
+        particlesContainer.appendChild(particle);
+      }
+    }
+    
+    // Initialize particles when page loads
+    window.addEventListener('load', createParticles);
+
+    // Add subtle animation to cards on scroll
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.transform = 'translateY(0)';
+          entry.target.style.opacity = '1';
+        }
+      });
+    }, observerOptions);
+
+    // Observe all fade-in elements
+    document.addEventListener('DOMContentLoaded', () => {
+      const fadeElements = document.querySelectorAll('.fade-in');
+      fadeElements.forEach(el => observer.observe(el));
+    });
+  </script>
+</body>
+</html>
